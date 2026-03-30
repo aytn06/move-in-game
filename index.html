@@ -1,0 +1,327 @@
+import React, { useEffect, useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Heart, Home, Code2, Bug, Sparkles, TerminalSquare } from "lucide-react";
+
+const BUG_LABELS = [
+  "long commute",
+  "too many goodbyes",
+  "high cuddle latency",
+  "separate snack inventory",
+  "insufficient cozy evenings",
+  "insufficient fish kisses",
+  "weeknight planning bugs",
+  "not enough waking up together",
+];
+
+function randomBetween(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+function makeBug(id) {
+  return {
+    id,
+    x: randomBetween(8, 82),
+    y: randomBetween(14, 74),
+    label: BUG_LABELS[id % BUG_LABELS.length],
+  };
+}
+
+export default function MoveInQuestionGame() {
+  const totalBugs = 6;
+  const [phase, setPhase] = useState("intro");
+  const [bugs, setBugs] = useState(() => Array.from({ length: totalBugs }, (_, i) => makeBug(i)));
+  const [fixed, setFixed] = useState(0);
+  const [showTerminal, setShowTerminal] = useState(false);
+  const [typed, setTyped] = useState("");
+  const [response, setResponse] = useState(null);
+
+  const terminalMessage = useMemo(
+    () =>
+      [
+        "// Final patch notes",
+        "const future = {",
+        '  mornings: "together",',
+        '  dinners: "shared",',
+        '  home: "ours",',
+        '  happiness: Infinity',
+        "};",
+        "",
+        "function nextChapter(us) {",
+        '  return us.moveInTogether();',
+        "}",
+        "",
+        'nextChapter("you + me");',
+      ].join("\n"),
+    []
+  );
+
+  useEffect(() => {
+    if (!showTerminal) return;
+    let i = 0;
+    const interval = setInterval(() => {
+      i += 1;
+      setTyped(terminalMessage.slice(0, i));
+      if (i >= terminalMessage.length) clearInterval(interval);
+    }, 28);
+    return () => clearInterval(interval);
+  }, [showTerminal, terminalMessage]);
+
+  useEffect(() => {
+    if (fixed >= totalBugs && phase === "game") {
+      const timer = setTimeout(() => {
+        setShowTerminal(true);
+        setPhase("reveal");
+      }, 700);
+      return () => clearTimeout(timer);
+    }
+  }, [fixed, totalBugs, phase]);
+
+  const handleBugClick = (id) => {
+    if (phase !== "game") return;
+    setBugs((prev) => prev.filter((bug) => bug.id !== id));
+    setFixed((v) => v + 1);
+  };
+
+  const resetGame = () => {
+    setPhase("intro");
+    setBugs(Array.from({ length: totalBugs }, (_, i) => makeBug(i)));
+    setFixed(0);
+    setShowTerminal(false);
+    setTyped("");
+    setResponse(null);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-slate-100 px-4 py-8">
+      <div className="mx-auto max-w-5xl">
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 flex items-center justify-center gap-3 text-center"
+        >
+          <Code2 className="h-7 w-7" />
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight">Patch My Life v2.0</h1>
+        </motion.div>
+
+        <motion.p
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08 }}
+          className="mx-auto mb-8 max-w-2xl text-center text-slate-300 text-base md:text-lg"
+        >
+          A tiny coding-themed game with one very important final deploy.
+        </motion.p>
+
+        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.12 }}
+            className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur shadow-2xl"
+          >
+            <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+              <div>
+                <div className="text-sm uppercase tracking-[0.2em] text-slate-400">Mini game</div>
+                <div className="text-xl font-semibold">Fix the relationship bugs</div>
+              </div>
+              <div className="rounded-full bg-emerald-400/15 px-3 py-1 text-sm text-emerald-300">
+                {fixed}/{totalBugs} fixed
+              </div>
+            </div>
+
+            <div className="relative h-[480px] md:h-[560px] overflow-hidden">
+              <AnimatePresence mode="wait">
+                {phase === "intro" && (
+                  <motion.div
+                    key="intro"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    className="absolute inset-0 flex flex-col items-center justify-center px-8 text-center"
+                  >
+                    <div className="mb-5 rounded-full bg-pink-400/10 p-4 text-pink-300">
+                      <Heart className="h-10 w-10" />
+                    </div>
+                    <h2 className="text-3xl font-bold">Ready for a tiny mission?</h2>
+                    <p className="mt-4 max-w-lg text-slate-300 leading-7">
+                      I found a few bugs in our current setup. Your job is to click and fix them all so we can deploy the best possible update.
+                    </p>
+                    <button
+                      onClick={() => setPhase("game")}
+                      className="mt-8 rounded-2xl bg-white text-slate-900 px-5 py-3 font-semibold shadow-lg transition hover:scale-[1.02]"
+                    >
+                      Start debugging
+                    </button>
+                  </motion.div>
+                )}
+
+                {phase === "game" && (
+                  <motion.div
+                    key="game"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0"
+                  >
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.10),transparent_40%)]" />
+                    <div className="absolute left-4 top-4 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-slate-300">
+                      Click every bug to fix it.
+                    </div>
+
+                    {bugs.map((bug) => (
+                      <motion.button
+                        key={bug.id}
+                        initial={{ scale: 0, rotate: -10, opacity: 0 }}
+                        animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        whileHover={{ scale: 1.06 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleBugClick(bug.id)}
+                        className="absolute rounded-2xl border border-rose-300/20 bg-rose-400/10 px-4 py-3 text-left shadow-lg backdrop-blur"
+                        style={{ left: `${bug.x}%`, top: `${bug.y}%`, transform: "translate(-50%, -50%)" }}
+                      >
+                        <div className="flex items-center gap-2 text-rose-200">
+                          <Bug className="h-4 w-4" />
+                          <span className="text-sm font-medium">{bug.label}</span>
+                        </div>
+                      </motion.button>
+                    ))}
+
+                    {fixed >= totalBugs && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="absolute inset-0 flex items-center justify-center bg-slate-950/65 backdrop-blur-sm"
+                      >
+                        <div className="rounded-3xl border border-emerald-300/20 bg-emerald-400/10 px-6 py-5 text-center shadow-xl">
+                          <Sparkles className="mx-auto mb-3 h-8 w-8 text-emerald-300" />
+                          <div className="text-2xl font-semibold">All bugs fixed.</div>
+                          <div className="mt-2 text-slate-300">Opening final deploy instructions…</div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </motion.div>
+                )}
+
+                {phase === "reveal" && (
+                  <motion.div
+                    key="reveal"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="absolute inset-0 overflow-y-auto px-5 py-6 md:px-8 md:py-8"
+                  >
+                    <div className="mx-auto max-w-2xl">
+                      <div className="mb-6 rounded-3xl border border-emerald-300/20 bg-slate-950/80 p-5 shadow-xl">
+                        <div className="mb-3 flex items-center gap-2 text-emerald-300">
+                          <TerminalSquare className="h-5 w-5" />
+                          <span className="font-medium">terminal</span>
+                        </div>
+                        <pre className="min-h-[260px] whitespace-pre-wrap text-sm leading-6 text-emerald-200">
+                          {typed}
+                          <span className="animate-pulse">▌</span>
+                        </pre>
+                      </div>
+
+                      {typed.length >= terminalMessage.length && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 14 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="rounded-3xl border border-pink-300/20 bg-pink-400/10 p-6 text-center shadow-xl"
+                        >
+                          <div className="mb-3 flex justify-center text-pink-300">
+                            <Home className="h-8 w-8" />
+                          </div>
+                          <h2 className="text-3xl font-bold tracking-tight">So… will you move in with me?</h2>
+                          <p className="mx-auto mt-4 max-w-xl text-slate-200 leading-7">
+                            I really love the idea of building a home with you — the ordinary days, the silly little routines, the dinners, the lazy mornings, all of it.
+                          </p>
+
+                          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                            <button
+                              onClick={() => setResponse("yes")}
+                              className="rounded-2xl bg-white px-5 py-3 font-semibold text-slate-900 shadow-lg transition hover:scale-[1.02]"
+                            >
+                              Yes, let’s do it ❤️
+                            </button>
+                            <button
+                              onClick={() => setResponse("talk")}
+                              className="rounded-2xl border border-white/15 bg-white/5 px-5 py-3 font-semibold text-white transition hover:bg-white/10"
+                            >
+                              Let’s talk details 🏡
+                            </button>
+                          </div>
+
+                          <AnimatePresence>
+                            {response === "yes" && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0 }}
+                                className="mt-6 rounded-2xl bg-emerald-400/15 px-4 py-4 text-emerald-100"
+                              >
+                                Dope Dope!!!! Let's do it!! But you already got the key to my heart and my place eh!! ✨
+                              </motion.div>
+                            )}
+                            {response === "talk" && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0 }}
+                                className="mt-6 rounded-2xl bg-sky-400/15 px-4 py-4 text-sky-100"
+                              >
+                                Awww!! Maybe I need to try another way. Always gonna try tho!!
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+
+                          <button
+                            onClick={resetGame}
+                            className="mt-6 text-sm text-slate-300 underline decoration-white/30 underline-offset-4 hover:text-white"
+                          >
+                            Replay from the start
+                          </button>
+                        </motion.div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.16 }}
+            className="space-y-6"
+          >
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl">
+              <div className="mb-3 flex items-center gap-2 text-pink-300">
+                <Sparkles className="h-5 w-5" />
+                <h3 className="text-lg font-semibold">How it works</h3>
+              </div>
+              <div className="space-y-3 text-slate-300 leading-7">
+                <p>1. She clicks through a tiny debugging game.</p>
+                <p>2. A terminal types out your final “deploy.”</p>
+                <p>3. It ends with the move-in question in a sweet way.</p>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl">
+              <div className="mb-3 flex items-center gap-2 text-emerald-300">
+                <Heart className="h-5 w-5" />
+                <h3 className="text-lg font-semibold">Easy custom edits</h3>
+              </div>
+              <div className="space-y-3 text-slate-300 leading-7 text-sm">
+                <p>Swap in her name in the final question.</p>
+                <p>Replace the bug labels with inside jokes.</p>
+                <p>Change the final message to be more funny, more soft, or more dramatic.</p>
+                <p>Add your own colors, photos, or a playlist link.</p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+}
