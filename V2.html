@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patch My Life v2.0</title>
+    <style>
+      :root {
+        --bg-1: #020617;
+        --bg-2: #0f172a;
+        --bg-3: #1e293b;
+        --panel: rgba(255, 255, 255, 0.06);
+        --panel-strong: rgba(2, 6, 23, 0.82);
+        --border: rgba(255, 255, 255, 0.12);
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --pink: #f9a8d4;
+        --pink-bg: rgba(244, 114, 182, 0.12);
+        --emerald: #86efac;
+        --emerald-bg: rgba(52, 211, 153, 0.12);
+        --rose: #fecdd3;
+        --rose-bg: rgba(251, 113, 133, 0.12);
+        --sky: #bae6fd;
+        --sky-bg: rgba(56, 189, 248, 0.12);
+        --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+        --radius-xl: 28px;
+        --radius-lg: 22px;
+        --radius-md: 16px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: linear-gradient(135deg, var(--bg-1), var(--bg-2), var(--bg-3));
+        color: var(--text);
+      }
+
+      body {
+        padding: 24px 16px 40px;
+      }
+
+      .page {
+        max-width: 1180px;
+        margin: 0 auto;
+      }
+
+      .hero {
+        text-align: center;
+        margin-bottom: 28px;
+        animation: fadeUp 0.7s ease;
+      }
+
+      .hero-row {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .hero-icon {
+        font-size: 30px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 4vw, 4rem);
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+      }
+
+      .subtitle {
+        margin: 16px auto 0;
+        max-width: 720px;
+        color: var(--muted);
+        font-size: clamp(1rem, 1.8vw, 1.15rem);
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+        gap: 24px;
+        align-items: start;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px);
+      }
+
+      .game-card {
+        overflow: hidden;
+        position: relative;
+      }
+
+      .game-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 20px 22px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .eyebrow {
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-size: 0.74rem;
+        margin-bottom: 6px;
+      }
+
+      .game-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+      }
+
+      .counter {
+        white-space: nowrap;
+        color: var(--emerald);
+        background: var(--emerald-bg);
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-size: 0.92rem;
+      }
+
+      .game-area {
+        height: 560px;
+        position: relative;
+        overflow: hidden;
+        background: radial-gradient(circle at top, rgba(255,255,255,0.08), transparent 42%);
+      }
+
+      .screen {
+        position: absolute;
+        inset: 0;
+        padding: 28px;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      .center-screen {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+
+      .intro-inner,
+      .overlay-inner,
+      .reveal-inner {
+        width: 100%;
+        max-width: 720px;
+        margin: 0 auto;
+        animation: fadeUp 0.5s ease;
+      }
+
+      .intro-badge,
+      .reveal-badge {
+        width: 78px;
+        height: 78px;
+        border-radius: 999px;
+        display: grid;
+        place-items: center;
+        margin: 0 auto 18px;
+        font-size: 2rem;
+      }
+
+      .intro-badge {
+        background: var(--pink-bg);
+        color: var(--pink);
+      }
+
+      .reveal-badge {
+        background: var(--pink-bg);
+        color: var(--pink);
+        width: 64px;
+        height: 64px;
+        margin-bottom: 14px;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: clamp(1.9rem, 3vw, 2.6rem);
+        line-height: 1.1;
+      }
+
+      .body-copy {
+        margin: 18px auto 0;
+        max-width: 620px;
+        color: var(--text);
+        line-height: 1.75;
+        font-size: 1.03rem;
+      }
+
+      .muted-copy {
+        color: var(--muted);
+      }
+
+      .btn-row {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-top: 28px;
+      }
+
+      button {
+        border: 0;
+        cursor: pointer;
+        font: inherit;
+        transition: transform 0.16s ease, opacity 0.16s ease, background 0.16s ease;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+      }
+
+      .primary-btn,
+      .secondary-btn,
+      .ghost-btn {
+        border-radius: 18px;
+        padding: 14px 20px;
+        font-weight: 700;
+      }
+
+      .primary-btn {
+        background: #ffffff;
+        color: #0f172a;
+        box-shadow: 0 12px 28px rgba(255, 255, 255, 0.15);
+      }
+
+      .secondary-btn {
+        background: rgba(255,255,255,0.06);
+        color: #ffffff;
+        border: 1px solid rgba(255,255,255,0.14);
+      }
+
+      .ghost-btn {
+        background: transparent;
+        color: var(--muted);
+        text-decoration: underline;
+        text-underline-offset: 4px;
+        padding: 10px 14px;
+      }
+
+      .top-note {
+        position: absolute;
+        left: 16px;
+        top: 16px;
+        z-index: 2;
+        border-radius: 18px;
+        border: 1px solid var(--border);
+        background: rgba(2, 6, 23, 0.74);
+        color: var(--muted);
+        padding: 12px 14px;
+        font-size: 0.92rem;
+      }
+
+      .bug {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        background: var(--rose-bg);
+        color: var(--rose);
+        border: 1px solid rgba(253, 164, 175, 0.18);
+        border-radius: 18px;
+        padding: 12px 14px;
+        text-align: left;
+        max-width: 220px;
+        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.28);
+        animation: popIn 0.28s ease;
+      }
+
+      .bug-label {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        font-size: 0.95rem;
+        font-weight: 600;
+      }
+
+      .overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(2, 6, 23, 0.66);
+        backdrop-filter: blur(6px);
+      }
+
+      .overlay-box {
+        background: var(--emerald-bg);
+        border: 1px solid rgba(110, 231, 183, 0.2);
+        border-radius: var(--radius-lg);
+        padding: 22px 26px;
+        text-align: center;
+      }
+
+      .overlay-title {
+        font-size: 1.7rem;
+        font-weight: 800;
+        margin-top: 8px;
+      }
+
+      .overlay-copy {
+        color: var(--muted);
+        margin-top: 8px;
+      }
+
+      .terminal-box {
+        background: var(--panel-strong);
+        border: 1px solid rgba(110, 231, 183, 0.18);
+        border-radius: var(--radius-xl);
+        padding: 18px;
+        box-shadow: var(--shadow);
+      }
+
+      .terminal-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--emerald);
+        font-weight: 700;
+        margin-bottom: 12px;
+      }
+
+      .terminal-dots {
+        display: inline-flex;
+        gap: 6px;
+      }
+
+      .terminal-dots span {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: currentColor;
+        opacity: 0.75;
+      }
+
+      .terminal-text {
+        min-height: 250px;
+        white-space: pre-wrap;
+        line-height: 1.7;
+        font-family: "SFMono-Regular", ui-monospace, Menlo, Monaco, Consolas, monospace;
+        color: #bbf7d0;
+        font-size: 0.95rem;
+      }
+
+      .cursor {
+        display: inline-block;
+        animation: blink 0.9s step-end infinite;
+      }
+
+      .final-box {
+        margin-top: 20px;
+        background: var(--pink-bg);
+        border: 1px solid rgba(244, 114, 182, 0.18);
+        border-radius: var(--radius-xl);
+        padding: 24px;
+        text-align: center;
+        box-shadow: var(--shadow);
+      }
+
+      .final-copy {
+        margin: 16px auto 0;
+        max-width: 620px;
+        line-height: 1.75;
+      }
+
+      .response {
+        margin-top: 18px;
+        border-radius: 18px;
+        padding: 16px;
+        animation: fadeUp 0.4s ease;
+      }
+
+      .response.yes {
+        background: var(--emerald-bg);
+        color: #d1fae5;
+      }
+
+      .response.talk {
+        background: var(--sky-bg);
+        color: #e0f2fe;
+      }
+
+      .side-column {
+        display: grid;
+        gap: 20px;
+      }
+
+      .side-card {
+        padding: 22px;
+      }
+
+      .side-title {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        font-size: 1.08rem;
+        font-weight: 700;
+        margin-bottom: 14px;
+      }
+
+      .side-card p {
+        margin: 10px 0 0;
+        color: var(--muted);
+        line-height: 1.75;
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes popIn {
+        from {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(0.86);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+        }
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+
+      @media (max-width: 980px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .game-area {
+          height: 520px;
+        }
+      }
+
+      @media (max-width: 640px) {
+        body {
+          padding: 18px 12px 28px;
+        }
+
+        .game-header {
+          padding: 16px;
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .screen {
+          padding: 18px;
+        }
+
+        .game-area {
+          height: 560px;
+        }
+
+        .bug {
+          max-width: 160px;
+          padding: 10px 12px;
+        }
+
+        .bug-label {
+          font-size: 0.86rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <div class="hero-row">
+          <div class="hero-icon">💻</div>
+          <h1>Patch My Life v2.0</h1>
+        </div>
+        <p class="subtitle">A tiny coding-themed game with one very important final deploy.</p>
+      </section>
+
+      <section class="layout">
+        <div class="panel game-card">
+          <div class="game-header">
+            <div>
+              <div class="eyebrow">Mini game</div>
+              <div class="game-title">Fix the relationship bugs</div>
+            </div>
+            <div class="counter"><span id="fixedCount">0</span>/<span id="totalCount">6</span> fixed</div>
+          </div>
+
+          <div class="game-area">
+            <div id="introScreen" class="screen center-screen">
+              <div class="intro-inner">
+                <div class="intro-badge">💗</div>
+                <h2>Ready for a tiny mission?</h2>
+                <p class="body-copy muted-copy">
+                  I found a few bugs in our current setup. Your job is to click and fix them all so we can deploy the best possible update.
+                </p>
+                <div class="btn-row">
+                  <button id="startBtn" class="primary-btn">Start debugging</button>
+                </div>
+              </div>
+            </div>
+
+            <div id="gameScreen" class="screen hidden">
+              <div class="top-note">Click every bug to fix it.</div>
+              <div id="bugContainer"></div>
+              <div id="successOverlay" class="overlay hidden">
+                <div class="overlay-inner">
+                  <div class="overlay-box">
+                    <div style="font-size: 2rem">✨</div>
+                    <div class="overlay-title">All bugs fixed.</div>
+                    <div class="overlay-copy">Opening final deploy instructions…</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="revealScreen" class="screen hidden" style="overflow-y:auto;">
+              <div class="reveal-inner">
+                <div class="terminal-box">
+                  <div class="terminal-header">
+                    <span class="terminal-dots"><span></span><span></span><span></span></span>
+                    <span>terminal</span>
+                  </div>
+                  <div id="terminalText" class="terminal-text"></div>
+                </div>
+
+                <div id="finalBox" class="final-box hidden">
+                  <div class="reveal-badge">🏠</div>
+                  <h2>So… will you move in with me?</h2>
+                  <p class="final-copy">
+                    I really love the idea of building a home with you — the ordinary days, the silly little routines, the dinners, the lazy mornings, all of it.
+                  </p>
+
+                  <div class="btn-row">
+                    <button id="yesBtn" class="primary-btn">Yes, let’s do it ❤️</button>
+                    <button id="talkBtn" class="secondary-btn">Let’s talk details 🏡</button>
+                  </div>
+
+                  <div id="yesResponse" class="response yes hidden">
+                    Dope Dope!!!! Let's do it!! But you already got the key to my heart and my place eh!! ✨
+                  </div>
+
+                  <div id="talkResponse" class="response talk hidden">
+                    Awww!! Maybe I need to try another way. Always gonna try tho!!
+                  </div>
+
+                  <div class="btn-row" style="margin-top: 14px;">
+                    <button id="replayBtn" class="ghost-btn">Replay from the start</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="side-column">
+          <div class="panel side-card">
+            <div class="side-title">✨ <span>How it works</span></div>
+            <p>1. She clicks through a tiny debugging game.</p>
+            <p>2. A terminal types out your final deploy.</p>
+            <p>3. It ends with the move-in question in a sweet way.</p>
+          </div>
+
+          <div class="panel side-card">
+            <div class="side-title">💚 <span>Easy custom edits</span></div>
+            <p>Swap in her name in the final question.</p>
+            <p>Replace the bug labels with inside jokes.</p>
+            <p>Change the final message to be more funny, more soft, or more dramatic.</p>
+            <p>Add your own colors, photos, or a playlist link.</p>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <script>
+      const BUG_LABELS = [
+        "long commute",
+        "too many goodbyes",
+        "high cuddle latency",
+        "separate snack inventory",
+        "insufficient cozy evenings",
+        "insufficient fish kisses",
+        "weeknight planning bugs",
+        "not enough waking up together",
+      ];
+
+      const TOTAL_BUGS = 6;
+      const terminalMessage = [
+        "// Final patch notes",
+        "const future = {",
+        '  mornings: "together",',
+        '  dinners: "shared",',
+        '  home: "ours",',
+        '  happiness: Infinity',
+        "};",
+        "",
+        "function nextChapter(us) {",
+        '  return us.moveInTogether();',
+        "}",
+        "",
+        'nextChapter("you + me");',
+      ].join("\n");
+
+      let fixed = 0;
+      let typingTimer = null;
+
+      const introScreen = document.getElementById("introScreen");
+      const gameScreen = document.getElementById("gameScreen");
+      const revealScreen = document.getElementById("revealScreen");
+      const successOverlay = document.getElementById("successOverlay");
+      const bugContainer = document.getElementById("bugContainer");
+      const fixedCount = document.getElementById("fixedCount");
+      const totalCount = document.getElementById("totalCount");
+      const terminalText = document.getElementById("terminalText");
+      const finalBox = document.getElementById("finalBox");
+      const yesResponse = document.getElementById("yesResponse");
+      const talkResponse = document.getElementById("talkResponse");
+
+      document.getElementById("startBtn").addEventListener("click", startGame);
+      document.getElementById("yesBtn").addEventListener("click", () => showResponse("yes"));
+      document.getElementById("talkBtn").addEventListener("click", () => showResponse("talk"));
+      document.getElementById("replayBtn").addEventListener("click", resetGame);
+
+      totalCount.textContent = TOTAL_BUGS;
+      resetGame();
+
+      function randomBetween(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      function createBug(id) {
+        const btn = document.createElement("button");
+        btn.className = "bug";
+        btn.style.left = `${randomBetween(10, 84)}%`;
+        btn.style.top = `${randomBetween(16, 76)}%`;
+        btn.innerHTML = `<div class="bug-label">🐞 <span>${BUG_LABELS[id % BUG_LABELS.length]}</span></div>`;
+        btn.addEventListener("click", () => {
+          btn.remove();
+          fixed += 1;
+          fixedCount.textContent = fixed;
+          if (fixed >= TOTAL_BUGS) {
+            finishGame();
+          }
+        });
+        return btn;
+      }
+
+      function startGame() {
+        introScreen.classList.add("hidden");
+        revealScreen.classList.add("hidden");
+        gameScreen.classList.remove("hidden");
+      }
+
+      function buildBugs() {
+        bugContainer.innerHTML = "";
+        for (let i = 0; i < TOTAL_BUGS; i += 1) {
+          bugContainer.appendChild(createBug(i));
+        }
+      }
+
+      function finishGame() {
+        successOverlay.classList.remove("hidden");
+        setTimeout(() => {
+          successOverlay.classList.add("hidden");
+          gameScreen.classList.add("hidden");
+          revealScreen.classList.remove("hidden");
+          typeTerminal();
+        }, 900);
+      }
+
+      function typeTerminal() {
+        clearInterval(typingTimer);
+        finalBox.classList.add("hidden");
+        terminalText.textContent = "";
+        let index = 0;
+        typingTimer = setInterval(() => {
+          index += 1;
+          const current = terminalMessage.slice(0, index);
+          terminalText.textContent = current;
+          if (index < terminalMessage.length) {
+            terminalText.innerHTML = current.replace(/\n/g, "<br>") + '<span class="cursor">▌</span>';
+          } else {
+            clearInterval(typingTimer);
+            terminalText.innerHTML = current.replace(/\n/g, "<br>") + '<span class="cursor">▌</span>';
+            finalBox.classList.remove("hidden");
+          }
+        }, 28);
+      }
+
+      function showResponse(type) {
+        yesResponse.classList.add("hidden");
+        talkResponse.classList.add("hidden");
+        if (type === "yes") {
+          yesResponse.classList.remove("hidden");
+        } else {
+          talkResponse.classList.remove("hidden");
+        }
+      }
+
+      function resetGame() {
+        clearInterval(typingTimer);
+        fixed = 0;
+        fixedCount.textContent = fixed;
+        introScreen.classList.remove("hidden");
+        gameScreen.classList.add("hidden");
+        revealScreen.classList.add("hidden");
+        successOverlay.classList.add("hidden");
+        finalBox.classList.add("hidden");
+        yesResponse.classList.add("hidden");
+        talkResponse.classList.add("hidden");
+        terminalText.innerHTML = "";
+        buildBugs();
+      }
+    </script>
+  </body>
+</html>
